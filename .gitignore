@@ -1,0 +1,27 @@
+# dependencies
+node_modules
+
+# output
+dist
+
+# temporary files
+tmp/
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+
+# dotenv environment variable files
+.env
+.env.local
+.env.*.local
+
+# caches
+*.tsbuildinfo
+
+# Finder (MacOS) folder config
+.DS_Store

@@ -1,0 +1,32 @@
+{
+  "name": "airnode-attestor",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch --import=./src/init-crypto.ts src/server.ts",
+    "fmt": "prettier . --write && eslint . --fix",
+    "lint": "prettier . --check && eslint .",
+    "start": "node --import=./src/init-crypto.ts --loader tsx src/server.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@reclaimprotocol/attestor-core": "^2.0.0",
+    "viem": "^2.47.6"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.39.0",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-functional": "^9.0.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-promise": "^7.2.1",
+    "eslint-plugin-unicorn": "^63.0.0",
+    "prettier": "3.8.1",
+    "tsx": "^4.19.0",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1",
+    "vitest": "^3.0.0"
+  }
+}
