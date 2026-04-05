@@ -54,10 +54,6 @@ interface ProveResponse {
   readonly signatures: Signatures;
 }
 
-interface ErrorResponse {
-  readonly error: string;
-}
-
 interface HealthResponse {
   readonly status: 'ok';
   readonly attestorUrl: string;
@@ -65,7 +61,6 @@ interface HealthResponse {
 
 export type {
   Claim,
-  ErrorResponse,
   HealthResponse,
   JsonResponse,
   ProveRequest,

@@ -8,22 +8,6 @@ type ZkEngine = 'gnark' | 'snarkjs' | 'stwo';
 // =============================================================================
 const VALID_ZK_ENGINES = new Set<string>(['gnark', 'snarkjs', 'stwo']);
 const VALID_METHODS = new Set(['GET', 'POST', 'PUT', 'PATCH']);
-const ALLOWED_URL_SCHEMES = new Set(['http:', 'https:']);
-
-const validateZkEngine = (raw: string): ZkEngine => {
-  if (!VALID_ZK_ENGINES.has(raw)) {
-    throw new Error(`Invalid ZK_ENGINE: ${raw}. Must be one of: gnark, snarkjs, stwo`);
-  }
-  return raw as ZkEngine;
-};
-
-const validatePort = (raw: string): number => {
-  const port = Number(raw);
-  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error(`Invalid PORT: ${raw}. Must be an integer between 1 and 65535`);
-  }
-  return port;
-};
 
 const PRIVATE_IP_RANGES = [
   /^127\./, // loopback
@@ -43,7 +27,7 @@ const isPrivateHostname = (hostname: string): boolean =>
 const validateUrl = (raw: string): string => {
   const parsed = new URL(raw);
 
-  if (!ALLOWED_URL_SCHEMES.has(parsed.protocol)) {
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new Error(`URL scheme must be http or https, got: ${parsed.protocol.replace(':', '')}`);
   }
 
@@ -54,6 +38,21 @@ const validateUrl = (raw: string): string => {
   return raw;
 };
 
+const validateZkEngine = (raw: string): ZkEngine => {
+  if (!VALID_ZK_ENGINES.has(raw)) {
+    throw new Error(`Invalid ZK_ENGINE: ${raw}. Must be one of: gnark, snarkjs, stwo`);
+  }
+  return raw as ZkEngine;
+};
+
+const validatePort = (raw: string): number => {
+  const port = Number(raw);
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+    throw new Error(`Invalid PORT: ${raw}. Must be an integer between 1 and 65535`);
+  }
+  return port;
+};
+
 // =============================================================================
 // Config
 // =============================================================================
@@ -62,6 +61,5 @@ const ATTESTOR_URL = process.env['ATTESTOR_URL'] ?? 'ws://localhost:8001/ws';
 const ZK_ENGINE = validateZkEngine(process.env['ZK_ENGINE'] ?? 'gnark');
 const PROVE_TIMEOUT_MS = Number(process.env['PROVE_TIMEOUT_MS'] ?? '30000');
 
-export { ALLOWED_URL_SCHEMES, ATTESTOR_URL, PORT, PROVE_TIMEOUT_MS, VALID_METHODS, ZK_ENGINE, isPrivateHostname };
-export { validateUrl };
+export { ATTESTOR_URL, PORT, PROVE_TIMEOUT_MS, VALID_METHODS, ZK_ENGINE, validateUrl };
 export type { ZkEngine };

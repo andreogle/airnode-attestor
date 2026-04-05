@@ -84,6 +84,12 @@ const MOCK_PROVE_RESULT = {
   },
 };
 
+const VALID_REQUEST = {
+  url: 'https://api.example.com/price',
+  method: 'GET',
+  responseMatches: [{ type: 'regex', value: String.raw`"price":\s*(?<price>[\d.]+)` }],
+};
+
 // =============================================================================
 // GET /health
 // =============================================================================
@@ -115,7 +121,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://api.example.com/price', method: 'GET' }),
+      body: JSON.stringify(VALID_REQUEST),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -141,7 +147,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://api.example.com/price', method: 'DELETE' }),
+      body: JSON.stringify({ ...VALID_REQUEST, method: 'DELETE' }),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -161,11 +167,35 @@ describe('POST /prove', () => {
     expect(body.error).toBe('Invalid JSON body');
   });
 
+  test('returns 400 for missing responseMatches', async () => {
+    const res = await fetch(`${baseUrl}/prove`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ url: 'https://api.example.com/price', method: 'GET' }),
+    });
+    const body = (await res.json()) as JsonBody;
+
+    expect(res.status).toBe(400);
+    expect(body.error).toBe('responseMatches must contain at least one entry');
+  });
+
+  test('returns 400 for empty responseMatches', async () => {
+    const res = await fetch(`${baseUrl}/prove`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ ...VALID_REQUEST, responseMatches: [] }),
+    });
+    const body = (await res.json()) as JsonBody;
+
+    expect(res.status).toBe(400);
+    expect(body.error).toBe('responseMatches must contain at least one entry');
+  });
+
   test('returns 400 for private/internal URLs', async () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'http://169.254.169.254/latest/meta-data/', method: 'GET' }),
+      body: JSON.stringify({ ...VALID_REQUEST, url: 'http://169.254.169.254/latest/meta-data/' }),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -177,7 +207,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'http://localhost:8001/ws', method: 'GET' }),
+      body: JSON.stringify({ ...VALID_REQUEST, url: 'http://localhost:8001/ws' }),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -189,7 +219,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'file:///etc/passwd', method: 'GET' }),
+      body: JSON.stringify({ ...VALID_REQUEST, url: 'file:///etc/passwd' }),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -203,7 +233,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://api.example.com/price', method: 'GET' }),
+      body: JSON.stringify(VALID_REQUEST),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -217,7 +247,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://api.example.com/price', method: 'GET' }),
+      body: JSON.stringify(VALID_REQUEST),
     });
     const body = (await res.json()) as JsonBody;
 
@@ -231,7 +261,7 @@ describe('POST /prove', () => {
     const res = await fetch(`${baseUrl}/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://api.example.com/price', method: 'GET' }),
+      body: JSON.stringify(VALID_REQUEST),
     });
     const body = (await res.json()) as JsonBody;
 

@@ -55,7 +55,7 @@ curl -X POST http://localhost:5177/prove \
 | `url`                | `string` | Yes      | Upstream API URL (must be http/https, no private IPs)  |
 | `method`             | `string` | Yes      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`)            |
 | `headers`            | `object` | No       | Secret headers (redacted from proof via TLS KeyUpdate) |
-| `responseMatches`    | `array`  | No       | Regex patterns the response must match                 |
+| `responseMatches`    | `array`  | Yes      | Regex patterns the response must match (min 1)         |
 | `responseRedactions` | `array`  | No       | JSON paths to selectively reveal to the attestor       |
 
 **Response (200):**

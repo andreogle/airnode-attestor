@@ -1,7 +1,6 @@
 import { go } from '@api3/promise-utils';
 import type { proto } from '@reclaimprotocol/attestor-core';
 import { createClaimOnAttestor } from '@reclaimprotocol/attestor-core';
-import type { Hex } from 'viem';
 import { toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { ATTESTOR_URL, PROVE_TIMEOUT_MS, ZK_ENGINE } from './config.ts';
@@ -11,23 +10,13 @@ import type { ProveRequest, ProveResponse } from './types.ts';
 // =============================================================================
 // Helpers
 // =============================================================================
-const generateOwnerKey = (): { readonly privateKey: Hex; readonly address: string } => {
+const generateOwnerKey = (): { readonly privateKey: `0x${string}`; readonly address: string } => {
   const privateKey = generatePrivateKey();
   const account = privateKeyToAccount(privateKey);
   return { privateKey, address: account.address };
 };
 
-const buildClaimRequest = (
-  request: ProveRequest,
-  ownerPrivateKey: Hex
-): {
-  readonly name: 'http';
-  readonly params: Record<string, unknown>;
-  readonly secretParams: Record<string, unknown>;
-  readonly ownerPrivateKey: Hex;
-  readonly client: { readonly url: string };
-  readonly zkEngine: string;
-} => ({
+const buildClaimRequest = (request: ProveRequest, ownerPrivateKey: `0x${string}`): Record<string, unknown> => ({
   name: 'http' as const,
   params: {
     url: request.url,
@@ -35,9 +24,7 @@ const buildClaimRequest = (
     responseMatches: request.responseMatches ?? [],
     responseRedactions: request.responseRedactions ?? [],
   },
-  secretParams: {
-    headers: request.headers ?? {},
-  },
+  secretParams: { headers: request.headers ?? {} },
   ownerPrivateKey,
   client: { url: ATTESTOR_URL },
   zkEngine: ZK_ENGINE,

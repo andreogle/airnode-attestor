@@ -22,11 +22,10 @@ const SECURITY_HEADERS: Readonly<Record<string, string>> = {
 // =============================================================================
 // Request handling
 // =============================================================================
-const readBody = (req: IncomingMessage): Promise<string> => {
-  return new Promise((resolve, reject) => {
+const readBody = (req: IncomingMessage): Promise<string> =>
+  new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
-    // eslint-disable-next-line functional/no-let
-    let totalBytes = 0;
+    let totalBytes = 0; // eslint-disable-line functional/no-let
     req.on('data', (chunk: Buffer) => {
       totalBytes += chunk.length;
       if (totalBytes > MAX_BODY_BYTES) {
@@ -34,15 +33,13 @@ const readBody = (req: IncomingMessage): Promise<string> => {
         reject(new Error('Request body too large'));
         return;
       }
-      // eslint-disable-next-line functional/immutable-data
-      chunks.push(chunk);
+      chunks.push(chunk); // eslint-disable-line functional/immutable-data
     });
     req.on('end', () => {
       resolve(Buffer.concat(chunks).toString());
     });
     req.on('error', reject);
   });
-};
 
 const jsonResponse = (status: number, body: unknown): JsonResponse => ({
   status,
@@ -70,7 +67,6 @@ const sanitizeError = (error: unknown): SanitizedError => {
   }
 
   const msg = error.message.toLowerCase();
-
   if (msg.includes('timeout')) return { status: 504, message: 'Proof generation timed out' };
   if (msg.includes('econnrefused')) return { status: 504, message: 'Attestor connection failed' };
   if (error.message === 'Request body too large') return { status: 413, message: 'Request body too large' };
@@ -83,21 +79,15 @@ const handleProve = async (req: IncomingMessage): Promise<JsonResponse> => {
   const raw = await readBody(req);
   const request = parseBody(raw);
 
-  if (!request) {
-    return jsonResponse(400, { error: 'Invalid JSON body' });
-  }
+  if (!request) return jsonResponse(400, { error: 'Invalid JSON body' });
+  if (!request.url) return jsonResponse(400, { error: 'Missing required field: url' });
+  if (!VALID_METHODS.has(request.method)) return jsonResponse(400, { error: `Invalid method: ${request.method}` });
 
-  if (!request.url) {
-    return jsonResponse(400, { error: 'Missing required field: url' });
-  }
+  const urlCheck = goSync(() => validateUrl(request.url));
+  if (!urlCheck.success) return jsonResponse(400, { error: 'Invalid or disallowed URL' });
 
-  if (!VALID_METHODS.has(request.method)) {
-    return jsonResponse(400, { error: `Invalid method: ${request.method}` });
-  }
-
-  const urlValidation = goSync(() => validateUrl(request.url));
-  if (!urlValidation.success) {
-    return jsonResponse(400, { error: 'Invalid or disallowed URL' });
+  if (!request.responseMatches || request.responseMatches.length === 0) {
+    return jsonResponse(400, { error: 'responseMatches must contain at least one entry' });
   }
 
   logger.info(`Proving ${request.method} ${request.url}`);
@@ -107,13 +97,8 @@ const handleProve = async (req: IncomingMessage): Promise<JsonResponse> => {
   return jsonResponse(200, result);
 };
 
-const handleHealth = (): JsonResponse => {
-  const response: HealthResponse = {
-    status: 'ok',
-    attestorUrl: ATTESTOR_URL,
-  };
-  return jsonResponse(200, response);
-};
+const handleHealth = (): JsonResponse =>
+  jsonResponse(200, { status: 'ok', attestorUrl: ATTESTOR_URL } satisfies HealthResponse);
 
 // =============================================================================
 // Server
@@ -137,8 +122,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise
       sendJson(res, status, JSON.stringify({ error: message }));
       return;
     }
-    const { status, body } = goResult.data;
-    sendJson(res, status, body);
+    sendJson(res, goResult.data.status, goResult.data.body);
     return;
   }
 
@@ -147,13 +131,10 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise
 
 const createApp = (): Server => {
   const server = createServer((req, res) => {
-    const requestId = randomUUID();
-    void runWithContext({ requestId }, () => handleRequest(req, res));
+    void runWithContext({ requestId: randomUUID() }, () => handleRequest(req, res));
   });
-  // eslint-disable-next-line functional/immutable-data
-  server.requestTimeout = 60_000;
-  // eslint-disable-next-line functional/immutable-data
-  server.headersTimeout = 10_000;
+  server.requestTimeout = 60_000; // eslint-disable-line functional/immutable-data
+  server.headersTimeout = 10_000; // eslint-disable-line functional/immutable-data
   return server;
 };
 
