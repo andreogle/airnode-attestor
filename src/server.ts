@@ -109,13 +109,13 @@ const sendJson = (res: ServerResponse, status: number, body: string): void => {
 };
 
 const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise<void> => {
-  if (req.method === 'GET' && req.url === '/health') {
+  if (req.method === 'GET' && req.url === '/v1/health') {
     const { status, body } = handleHealth();
     sendJson(res, status, body);
     return;
   }
 
-  if (req.method === 'POST' && req.url === '/prove') {
+  if (req.method === 'POST' && req.url === '/v1/prove') {
     const goResult = await go(() => handleProve(req));
     if (!goResult.success) {
       const { status, message } = sanitizeError(goResult.error);

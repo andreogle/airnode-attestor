@@ -136,6 +136,24 @@ describe('prove', () => {
     expect(callArgs['params']?.['responseRedactions']).toEqual(responseRedactions);
   });
 
+  test('passes body to params when provided', async () => {
+    mockCreateClaimOnAttestor.mockResolvedValue(makeMockResult());
+
+    await prove(makeRequest({ method: 'POST', body: '{"query":"ethereum"}' }));
+
+    const callArgs = mockCreateClaimOnAttestor.mock.calls[0]?.[0] as Record<string, Record<string, unknown>>;
+    expect(callArgs['params']?.['body']).toBe('{"query":"ethereum"}');
+  });
+
+  test('passes empty body to params when not provided', async () => {
+    mockCreateClaimOnAttestor.mockResolvedValue(makeMockResult());
+
+    await prove(makeRequest());
+
+    const callArgs = mockCreateClaimOnAttestor.mock.calls[0]?.[0] as Record<string, Record<string, unknown>>;
+    expect(callArgs['params']?.['body']).toBe('');
+  });
+
   test('uses gnark zkEngine by default', async () => {
     mockCreateClaimOnAttestor.mockResolvedValue(makeMockResult());
 

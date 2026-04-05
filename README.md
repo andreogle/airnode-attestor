@@ -22,11 +22,13 @@ This service closes that gap. By routing API calls through a Reclaim attestor, i
 
 ## How it works
 
-1. Airnode sends a request to `POST /prove` with a URL, method, headers, and extraction config.
-2. This service opens a WebSocket tunnel to a Reclaim attestor.
-3. The attestor creates a TLS connection to the upstream API and captures the response.
-4. ZK proofs are generated proving the response is authentic without revealing secret data (e.g., API keys).
-5. The attestor signs the claim and returns it to Airnode.
+1. Airnode sends a `POST /v1/prove` request with the upstream URL, HTTP method, headers, and response extraction config.
+2. This service generates a throwaway Ethereum key pair for the request and opens a WebSocket tunnel to a Reclaim attestor.
+3. The attestor establishes a TLS connection to the upstream API. Secret headers (e.g., API keys) are protected using TLS 1.3 KeyUpdate — the attestor never sees them in plaintext.
+4. The upstream API response is captured. If `responseMatches` are provided, the response is validated against regex patterns and named capture groups extract values into the proof context.
+5. Zero-knowledge proofs are generated (using gnark by default) proving the response is authentic without revealing any redacted data.
+6. The attestor verifies the proofs and signs the claim. The signature covers a keccak256 hash of the provider, parameters, and context — binding the proof to the exact request and response.
+7. The signed claim is returned to Airnode, which attaches it to the API response alongside its own EIP-191 signature.
 
 ```
 Airnode ──POST /prove──> airnode-attestor ──WebSocket──> Reclaim Attestor ──TLS──> Upstream API
@@ -49,12 +51,12 @@ The gateway is available at `http://localhost:5177`.
 
 ## API
 
-### `POST /prove`
+### `POST /v1/prove`
 
 Generate a TLS proof for an API response.
 
 ```bash
-curl -X POST http://localhost:5177/prove \
+curl -X POST http://localhost:5177/v1/prove \
   -H 'Content-Type: application/json' \
   -d '{
     "url": "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd",
@@ -72,6 +74,7 @@ curl -X POST http://localhost:5177/prove \
 | `url`                | `string` | Yes      | Upstream API URL (must be http/https, no private IPs)  |
 | `method`             | `string` | Yes      | HTTP method (`GET`, `POST`, `PUT`, `PATCH`)            |
 | `headers`            | `object` | No       | Secret headers (redacted from proof via TLS KeyUpdate) |
+| `body`               | `string` | No       | Request body to send to the upstream API               |
 | `responseMatches`    | `array`  | Yes      | Regex patterns the response must match (min 1)         |
 | `responseRedactions` | `array`  | No       | JSON paths to selectively reveal to the attestor       |
 
@@ -95,7 +98,7 @@ curl -X POST http://localhost:5177/prove \
 }
 ```
 
-### `GET /health`
+### `GET /v1/health`
 
 Returns service status and attestor URL.
 

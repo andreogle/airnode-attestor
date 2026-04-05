@@ -21,6 +21,7 @@ const buildClaimRequest = (request: ProveRequest, ownerPrivateKey: `0x${string}`
   params: {
     url: request.url,
     method: request.method,
+    body: request.body ?? '',
     responseMatches: request.responseMatches ?? [],
     responseRedactions: request.responseRedactions ?? [],
   },

@@ -95,7 +95,7 @@ const VALID_REQUEST = {
 // =============================================================================
 describe('GET /health', () => {
   test('returns 200 with status ok and attestor URL', async () => {
-    const res = await fetch(`${baseUrl}/health`);
+    const res = await fetch(`${baseUrl}/v1/health`);
     const body = (await res.json()) as JsonBody;
 
     expect(res.status).toBe(200);
@@ -104,7 +104,7 @@ describe('GET /health', () => {
   });
 
   test('includes security headers', async () => {
-    const res = await fetch(`${baseUrl}/health`);
+    const res = await fetch(`${baseUrl}/v1/health`);
 
     expect(res.headers.get('x-content-type-options')).toBe('nosniff');
     expect(res.headers.get('cache-control')).toBe('no-store');
@@ -118,7 +118,7 @@ describe('POST /prove', () => {
   test('returns 200 with proof on success', async () => {
     mockProve.mockResolvedValue(MOCK_PROVE_RESULT);
 
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(VALID_REQUEST),
@@ -132,7 +132,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for missing url and method', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ foo: 'bar' }),
@@ -144,7 +144,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for invalid method', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...VALID_REQUEST, method: 'DELETE' }),
@@ -156,7 +156,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for malformed JSON', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: 'not valid json',
@@ -168,7 +168,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for missing responseMatches', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ url: 'https://api.example.com/price', method: 'GET' }),
@@ -180,7 +180,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for empty responseMatches', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...VALID_REQUEST, responseMatches: [] }),
@@ -192,7 +192,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for private/internal URLs', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...VALID_REQUEST, url: 'http://169.254.169.254/latest/meta-data/' }),
@@ -204,7 +204,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for localhost URLs', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...VALID_REQUEST, url: 'http://localhost:8001/ws' }),
@@ -216,7 +216,7 @@ describe('POST /prove', () => {
   });
 
   test('returns 400 for file:// scheme URLs', async () => {
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ ...VALID_REQUEST, url: 'file:///etc/passwd' }),
@@ -230,7 +230,7 @@ describe('POST /prove', () => {
   test('returns sanitized error on prove failure', async () => {
     mockProve.mockRejectedValue(new Error('Something internal went wrong'));
 
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(VALID_REQUEST),
@@ -244,7 +244,7 @@ describe('POST /prove', () => {
   test('returns 504 on timeout errors', async () => {
     mockProve.mockRejectedValue(new Error('Proof generation timeout'));
 
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(VALID_REQUEST),
@@ -258,7 +258,7 @@ describe('POST /prove', () => {
   test('returns 504 on connection refused', async () => {
     mockProve.mockRejectedValue(new Error('connect ECONNREFUSED 127.0.0.1:8001'));
 
-    const res = await fetch(`${baseUrl}/prove`, {
+    const res = await fetch(`${baseUrl}/v1/prove`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify(VALID_REQUEST),

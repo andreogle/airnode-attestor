@@ -27,6 +27,7 @@ interface ProveRequest {
   readonly url: string;
   readonly method: 'GET' | 'POST' | 'PUT' | 'PATCH';
   readonly headers?: Readonly<Record<string, string>>;
+  readonly body?: string;
   readonly responseMatches?: readonly ResponseMatch[];
   readonly responseRedactions?: readonly ResponseRedaction[];
 }
