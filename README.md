@@ -2,6 +2,23 @@
 
 HTTP service that generates TLS proofs for API responses using [Reclaim Protocol](https://reclaimprotocol.org/). It sits between [Airnode](https://github.com/api3dao/airnode) and a Reclaim attestor, providing cryptographic proof that API data is authentic.
 
+## Table of contents
+
+- [Why](#why)
+- [How it works](#how-it-works)
+- [Prerequisites](#prerequisites)
+- [Quick start](#quick-start)
+- [API](#api)
+- [Configuration](#configuration)
+- [Development](#development)
+- [Proof verification](#proof-verification)
+- [License](#license)
+
+## Why
+
+Airnode serves data from off-chain APIs, but consumers have no way to verify that the data actually came from the claimed source. An operator could modify responses before signing them and nobody would know.
+
+This service closes that gap. By routing API calls through a Reclaim attestor, it produces a TLS proof that the response is authentic — cryptographic evidence that the data came directly from the upstream API, unmodified. Combined with Airnode's existing EIP-191 signature, consumers get both operator accountability and data provenance.
 
 ## How it works
 
@@ -134,4 +151,3 @@ On-chain verification is available via [`@reclaimprotocol/verifier-solidity-sdk`
 ## License
 
 This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
-
