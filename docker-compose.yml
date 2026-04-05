@@ -1,0 +1,15 @@
+services:
+  attestor:
+    # Pinned to commit hash — Reclaim only publishes commit-hash tags.
+    # Find latest: https://github.com/reclaimprotocol/attestor-core/pkgs/container/attestor-core
+    image: ghcr.io/reclaimprotocol/attestor-core:c036b809f161b50c1fe5f0c1e8197df2890f206f
+    environment:
+      - PRIVATE_KEY=${PRIVATE_KEY}
+
+  gateway:
+    build: .
+    env_file: .env
+    ports:
+      - '5177:5177'
+    depends_on:
+      - attestor

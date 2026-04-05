@@ -78,12 +78,10 @@ src/
   prove.ts            Core proving logic — wraps createClaimOnAttestor
   types.ts            Request/response types
   init-crypto.ts      TLS crypto initialization (preloaded via --import)
-docker/
-  docker-compose.yml  Reclaim attestor container + this service
-  .env.example        Attestor private key, port config
-test/
-  prove.test.ts       Proving integration tests
-  server.test.ts      HTTP endpoint tests
+  logger.ts           Structured logging with AsyncLocalStorage request context
+  config.ts           Environment variable parsing and validation
+docker-compose.yml    Reclaim attestor container + this service
+.env.example          Attestor private key, port config
 ```
 
 Key conventions:
@@ -199,32 +197,20 @@ Environment variables:
 
 | Variable       | Required | Default                  | Description                                    |
 | -------------- | -------- | ------------------------ | ---------------------------------------------- |
-| `PORT`         | No       | `4000`                   | HTTP server port                               |
+| `PORT`         | No       | `5177`                   | HTTP server port                               |
 | `ATTESTOR_URL` | No       | `ws://localhost:8001/ws` | WebSocket URL of the Reclaim attestor          |
 | `ZK_ENGINE`    | No       | `gnark`                  | ZK proof engine: `gnark`, `snarkjs`, or `stwo` |
 | `LOG_LEVEL`    | No       | `info`                   | Logging level                                  |
 
-The Reclaim attestor itself is configured separately (see `docker/` directory). Its only required env var is
+The Reclaim attestor itself is configured via the shared `.env` file. Its only required env var is
 `PRIVATE_KEY` — the Ethereum private key used to sign claims.
 
 ## Docker deployment
 
-```yaml
-# docker-compose.yml
-services:
-  attestor:
-    image: ghcr.io/reclaimprotocol/attestor-core:b372f225cba5af1bbbaa061c31a3f2ae31490982
-    env_file: .env.attestor
-    ports:
-      - '8001:8001'
-
-  gateway:
-    build: .
-    env_file: .env.gateway
-    ports:
-      - '4000:4000'
-    depends_on:
-      - attestor
+```bash
+cp .env.example .env   # fill in PRIVATE_KEY
+npm run docker:up      # builds gateway + pulls attestor
+npm run docker:down    # tear down
 ```
 
 Where `.env.attestor` contains the attestor's signing key and `.env.gateway` has `ATTESTOR_URL=ws://attestor:8001/ws`.
@@ -256,8 +242,10 @@ Where `.env.attestor` contains the attestor's signing key and `.env.gateway` has
   `Map.set`), annotate with an eslint-disable comment.
 - Don't use non-null assertions (`!`). Use narrowing or optional chaining.
 - Prefer readability over cleverness. Break complex expressions into named intermediate values.
+- Use `go()` and `goSync()` from `@api3/promise-utils` instead of try/catch. These return `{ success, data, error }`
+  discriminated unions. Only use try/catch in test files or when re-throwing is the only path.
 - Named exports at the bottom of files with separate `export type { ... }` blocks.
-- Use multilevel section comments to separate logical sections:
+- Use multilevel section comments to separate logical sections. No empty line after the closing `=` line:
   ```ts
   // =============================================================================
   // Section name

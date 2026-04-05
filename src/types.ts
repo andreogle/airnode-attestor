@@ -1,7 +1,19 @@
 // =============================================================================
+// HTTP primitives
+// =============================================================================
+interface JsonResponse {
+  readonly status: number;
+  readonly body: string;
+}
+
+interface SanitizedError {
+  readonly status: number;
+  readonly message: string;
+}
+
+// =============================================================================
 // Request types
 // =============================================================================
-
 interface ResponseMatch {
   readonly type: 'regex';
   readonly value: string;
@@ -22,7 +34,6 @@ interface ProveRequest {
 // =============================================================================
 // Response types
 // =============================================================================
-
 interface Claim {
   readonly provider: string;
   readonly parameters: string;
@@ -50,16 +61,17 @@ interface ErrorResponse {
 interface HealthResponse {
   readonly status: 'ok';
   readonly attestorUrl: string;
-  readonly attestorAddress: string;
 }
 
 export type {
   Claim,
   ErrorResponse,
   HealthResponse,
+  JsonResponse,
   ProveRequest,
   ProveResponse,
   ResponseMatch,
   ResponseRedaction,
+  SanitizedError,
   Signatures,
 };
