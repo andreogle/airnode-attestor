@@ -26,7 +26,7 @@ This service closes that gap. By routing API calls through a Reclaim attestor, i
 2. This service generates a throwaway Ethereum key pair for the request and opens a WebSocket tunnel to a Reclaim attestor.
 3. The attestor establishes a TLS connection to the upstream API. Secret headers (e.g., API keys) are protected using TLS 1.3 KeyUpdate — the attestor never sees them in plaintext.
 4. The upstream API response is captured. If `responseMatches` are provided, the response is validated against regex patterns and named capture groups extract values into the proof context.
-5. Zero-knowledge proofs are generated (using gnark by default) proving the response is authentic without revealing any redacted data.
+5. Zero-knowledge proofs are generated (using [gnark](https://github.com/Consensys/gnark) by default) proving the response is authentic without revealing any redacted data.
 6. The attestor verifies the proofs and signs the claim. The signature covers a keccak256 hash of the provider, parameters, and context — binding the proof to the exact request and response.
 7. The signed claim is returned to Airnode, which attaches it to the API response alongside its own EIP-191 signature.
 
@@ -36,7 +36,7 @@ Airnode ──POST /prove──> airnode-attestor ──WebSocket──> Reclaim
 
 ## Prerequisites
 
-- Node.js 18+
+- Node.js 22+
 - Docker (for running the Reclaim attestor)
 
 ## Quick start

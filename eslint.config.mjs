@@ -66,6 +66,7 @@ export default defineConfig([
       'functional/no-loop-statements': 'error',
 
       // --- Unicorn overrides ---
+      'unicorn/number-literal-case': 'off', // Conflicts with Prettier (Prettier uppercases hex)
       'unicorn/prevent-abbreviations': 'off',
 
       // --- Import ordering (alphabetical) ---

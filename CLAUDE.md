@@ -1,18 +1,33 @@
 ## Overview
 
 airnode-attestor is an HTTP service that generates TLS proofs for API responses using Reclaim Protocol. It sits between
-Airnode and a Reclaim attestor, exposing a simple `POST /prove` endpoint that Airnode calls when proof mode is enabled.
+Airnode and a Reclaim attestor, exposing a simple `POST /v1/prove` endpoint that Airnode calls when proof mode is enabled.
 
 The service is operated by ChainAPI — Airnode operators don't run this. They configure `proof.gatewayUrl` in their
 Airnode config and the gateway handles everything.
 
 ## Runtime
 
-Node.js (not Bun). The Reclaim attestor-core SDK has native modules (`re2`, gnark FFI) that require Node.js.
+Node.js 22+ (not Bun). The Reclaim attestor-core SDK has native modules (`re2`, gnark FFI) that require Node.js.
 
-- `node` / `tsx` for running TypeScript
+- `node --experimental-strip-types` for running TypeScript directly (no transpiler needed)
 - `npm install` for dependency management
 - Use TypeScript with ESM (`"type": "module"` in package.json)
+
+## Scripts
+
+```bash
+npm run dev          # start with --watch for development
+npm start            # start the server
+npm test             # run tests with vitest
+npm run test:watch   # run tests in watch mode
+npm run lint         # check formatting (prettier) + linting (eslint)
+npm run fmt          # auto-fix formatting + linting
+npm run typecheck    # run tsc --noEmit
+npm run setup        # alias for npm install
+npm run docker:up    # docker compose up --build
+npm run docker:down  # docker compose down
+```
 
 ## License
 
@@ -24,7 +39,7 @@ this is a separate repo from Airnode (which is MIT). Airnode communicates with t
 ```
 Airnode (Bun, MIT)                    airnode-attestor (Node.js, AGPL)
   │                                     │
-  │  POST /prove                        │
+  │  POST /v1/prove                     │
   │  { url, method, headers, ... }      │
   │────────────────────────────────────▶│
   │                                     │  WebSocket tunnel
@@ -47,12 +62,13 @@ Three processes:
 
 ## Dependencies
 
-| Package                                | License        | Purpose                                        |
-| -------------------------------------- | -------------- | ---------------------------------------------- |
-| `@reclaimprotocol/attestor-core`       | AGPL-3.0       | Client SDK for creating claims on the attestor |
-| `@reclaimprotocol/tls`                 | GitHub (check) | TLS crypto implementation (webcrypto backend)  |
-| `@reclaimprotocol/zk-symmetric-crypto` | (check)        | ZK proof generation (gnark backend)            |
-| `viem`                                 | MIT            | Ethereum primitives (key generation, hashing)  |
+| Package                                | License        | Purpose                                                |
+| -------------------------------------- | -------------- | ------------------------------------------------------ |
+| `@api3/promise-utils`                  | MIT            | `go()`/`goSync()` for error handling without try/catch |
+| `@reclaimprotocol/attestor-core`       | AGPL-3.0       | Client SDK for creating claims on the attestor         |
+| `@reclaimprotocol/tls`                 | GitHub (check) | TLS crypto implementation (webcrypto backend)          |
+| `@reclaimprotocol/zk-symmetric-crypto` | (check)        | ZK proof generation (gnark backend)                    |
+| `viem`                                 | MIT            | Ethereum primitives (key generation, hashing)          |
 
 ### Known setup quirks
 
@@ -67,21 +83,25 @@ Three processes:
   ```
 - `@reclaimprotocol/tls` ships with an empty crypto object that must be initialized at startup via
   `setCryptoImplementation(webcryptoCrypto)`. The `zk-symmetric-crypto` package has a **nested copy** of
-  `@reclaimprotocol/tls` in its own `node_modules/` — both instances must be initialized. Use an ESM preload script
-  (`--import=./init-crypto.mjs`) to handle this before any attestor-core code loads.
+  `@reclaimprotocol/tls` in its own `node_modules/` — both instances must be initialized. Use a preload script
+  (`--experimental-strip-types --import=./src/init-crypto.ts`) to handle this before any attestor-core code loads.
 
 ## Project structure
 
 ```
 src/
-  server.ts           HTTP server (POST /prove, GET /health)
-  prove.ts            Core proving logic — wraps createClaimOnAttestor
-  types.ts            Request/response types
-  init-crypto.ts      TLS crypto initialization (preloaded via --import)
-  logger.ts           Structured logging with AsyncLocalStorage request context
-  config.ts           Environment variable parsing and validation
-docker-compose.yml    Reclaim attestor container + this service
-.env.example          Attestor private key, port config
+  config.ts             Environment variable parsing and validation
+  init-crypto.ts        TLS crypto initialization (preloaded via --import)
+  logger.ts             Structured logging with AsyncLocalStorage request context
+  prove.ts              Core proving logic — wraps createClaimOnAttestor
+  prove.test.ts         Tests for prove.ts
+  server.ts             HTTP server (POST /v1/prove, GET /v1/health)
+  server.test.ts        Tests for server.ts
+  types.ts              Request/response types
+.github/workflows/ci.yml  CI: lint, typecheck, test
+docker-compose.yml        Reclaim attestor container + this service
+Dockerfile                Multi-stage Node 22 image
+.env.example              Attestor private key, port config
 ```
 
 Key conventions:
@@ -91,7 +111,7 @@ Key conventions:
 
 ## Expected API
 
-### `POST /prove`
+### `POST /v1/prove`
 
 Request:
 
@@ -102,6 +122,7 @@ Request:
   "headers": {
     "x-cg-pro-api-key": "secret-api-key"
   },
+  "body": "",
   "responseMatches": [
     {
       "type": "regex",
@@ -116,12 +137,13 @@ Request:
 }
 ```
 
-- `url` (required) — upstream API URL to call through the attestor tunnel
+- `url` (required) — upstream API URL to call through the attestor tunnel. Must be http/https, no private IPs.
 - `method` (required) — HTTP method (GET, POST, PUT, PATCH)
 - `headers` (optional) — headers to send with the upstream request. These are treated as **secret** — redacted from the
   proof via TLS 1.3 KeyUpdate. The attestor never sees them in plaintext.
-- `responseMatches` (optional) — regex patterns the response must match. Named capture groups (e.g., `(?<price>...)`)
-  populate `extractedParameters` in the proof context.
+- `body` (optional) — request body to send with the upstream request. Defaults to empty string.
+- `responseMatches` (required) — regex patterns the response must match. Must contain at least one entry. Named capture
+  groups (e.g., `(?<price>...)`) populate `extractedParameters` in the proof context.
 - `responseRedactions` (optional) — which parts of the response to reveal to the attestor. `jsonPath` selects specific
   JSON fields. If omitted, the full response is revealed.
 
@@ -160,15 +182,14 @@ Error response (4xx/5xx):
 }
 ```
 
-### `GET /health`
+### `GET /v1/health`
 
 Response (200):
 
 ```json
 {
   "status": "ok",
-  "attestorUrl": "ws://attestor:8001/ws",
-  "attestorAddress": "0x..."
+  "attestorUrl": "ws://attestor:8001/ws"
 }
 ```
 
@@ -195,12 +216,12 @@ Response (200):
 
 Environment variables:
 
-| Variable       | Required | Default                  | Description                                    |
-| -------------- | -------- | ------------------------ | ---------------------------------------------- |
-| `PORT`         | No       | `5177`                   | HTTP server port                               |
-| `ATTESTOR_URL` | No       | `ws://localhost:8001/ws` | WebSocket URL of the Reclaim attestor          |
-| `ZK_ENGINE`    | No       | `gnark`                  | ZK proof engine: `gnark`, `snarkjs`, or `stwo` |
-| `LOG_LEVEL`    | No       | `info`                   | Logging level                                  |
+| Variable           | Required | Default                  | Description                                    |
+| ------------------ | -------- | ------------------------ | ---------------------------------------------- |
+| `PORT`             | No       | `5177`                   | HTTP server port                               |
+| `ATTESTOR_URL`     | No       | `ws://localhost:8001/ws` | WebSocket URL of the Reclaim attestor          |
+| `ZK_ENGINE`        | No       | `gnark`                  | ZK proof engine: `gnark`, `snarkjs`, or `stwo` |
+| `PROVE_TIMEOUT_MS` | No       | `30000`                  | Timeout for proof generation in milliseconds   |
 
 The Reclaim attestor itself is configured via the shared `.env` file. Its only required env var is
 `PRIVATE_KEY` — the Ethereum private key used to sign claims.
@@ -213,7 +234,7 @@ npm run docker:up      # builds gateway + pulls attestor
 npm run docker:down    # tear down
 ```
 
-Where `.env.attestor` contains the attestor's signing key and `.env.gateway` has `ATTESTOR_URL=ws://attestor:8001/ws`.
+Both services share a single `.env` file. The gateway reads all env vars from it; the attestor only needs `PRIVATE_KEY`.
 
 ## Testing
 
@@ -278,7 +299,17 @@ ESLint config (`eslint.config.mjs`):
 - `eslint-plugin-import` (alphabetical ordering, no cycles)
 - `eslint-plugin-promise` recommended
 
-After finishing writing code, always run `prettier . --write && eslint . --fix`.
+After finishing writing code, always run `npm run fmt`.
+
+## CI
+
+GitHub Actions runs on push/PR to `main` (`.github/workflows/ci.yml`):
+
+1. `npm run lint` — Prettier + ESLint checks
+2. `npm run typecheck` — `tsc --noEmit`
+3. `npm test` — vitest
+
+All three run in a single job on Node 22.
 
 ## Git
 

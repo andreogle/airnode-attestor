@@ -20,7 +20,7 @@ vi.mock('viem/accounts', () => ({
 // =============================================================================
 // Fixtures
 // =============================================================================
-const MOCK_CLAIM_SIGNATURE = new Uint8Array([0xAB, 0xCD, 0xEF, 0x01, 0x23]);
+const MOCK_CLAIM_SIGNATURE = new Uint8Array([0xab, 0xcd, 0xef, 0x01, 0x23]);
 
 interface MockClaimResult {
   readonly claim:
@@ -58,7 +58,7 @@ const makeMockResult = (): MockClaimResult => ({
   signatures: {
     attestorAddress: '0x1234567890abcdef1234567890abcdef12345678',
     claimSignature: MOCK_CLAIM_SIGNATURE,
-    resultSignature: new Uint8Array([0xFF]),
+    resultSignature: new Uint8Array([0xff]),
   },
   error: undefined,
   request: undefined,
