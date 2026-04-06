@@ -333,7 +333,7 @@ assert(recovered === signatures.attestorAddress);
 ```
 
 On-chain verification is available via Reclaim's deployed `verifyProof()` contracts on Ethereum, Polygon, Arbitrum,
-BNB Chain, and others. See `@reclaimprotocol/verifier-solidity-sdk`.
+BNB Chain, and others. See `@reclaimprotocol/reclaim-solidity-sdk`.
 
 ## Performance
 

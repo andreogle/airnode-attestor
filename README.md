@@ -149,7 +149,7 @@ const recovered = await recoverAddress({
 assert(recovered === signatures.attestorAddress);
 ```
 
-On-chain verification is available via [`@reclaimprotocol/verifier-solidity-sdk`](https://github.com/reclaimprotocol/solidity-sdk).
+On-chain verification is available via [`@reclaimprotocol/reclaim-solidity-sdk`](https://github.com/reclaimprotocol/reclaim-solidity-sdk).
 
 ## License
 
