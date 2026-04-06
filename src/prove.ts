@@ -4,7 +4,6 @@ import { createClaimOnAttestor } from '@reclaimprotocol/attestor-core';
 import { toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
 import { ATTESTOR_URL, PROVE_TIMEOUT_MS, ZK_ENGINE } from './config.ts';
-import { logger } from './logger.ts';
 import type { ProveRequest, ProveResponse } from './types.ts';
 
 // =============================================================================
@@ -62,7 +61,7 @@ const extractResult = (result: proto.ClaimTunnelResponse): ProveResponse => {
 // =============================================================================
 const prove = async (request: ProveRequest): Promise<ProveResponse> => {
   const owner = generateOwnerKey();
-  logger.debug(`Owner address: ${owner.address}`);
+  console.info(`Owner address: ${owner.address}`);
 
   const claimRequest = buildClaimRequest(request, owner.privateKey);
   const result = await go(() => createClaimOnAttestor(claimRequest), { totalTimeoutMs: PROVE_TIMEOUT_MS });

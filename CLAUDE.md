@@ -92,7 +92,6 @@ Three processes:
 src/
   config.ts             Environment variable parsing and validation
   init-crypto.ts        TLS crypto initialization (preloaded via --import)
-  logger.ts             Structured logging with AsyncLocalStorage request context
   prove.ts              Core proving logic — wraps createClaimOnAttestor
   prove.test.ts         Tests for prove.ts
   server.ts             HTTP server (POST /v1/prove, GET /v1/health)

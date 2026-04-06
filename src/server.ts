@@ -1,10 +1,8 @@
-import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 import { createServer } from 'node:http';
 import { fileURLToPath } from 'node:url';
 import { go, goSync } from '@api3/promise-utils';
 import { ATTESTOR_URL, PORT, VALID_METHODS, validateUrl } from './config.ts';
-import { logger, runWithContext } from './logger.ts';
 import { prove } from './prove.ts';
 import type { HealthResponse, JsonResponse, ProveRequest, SanitizedError } from './types.ts';
 
@@ -71,7 +69,7 @@ const sanitizeError = (error: unknown): SanitizedError => {
   if (msg.includes('econnrefused')) return { status: 504, message: 'Attestor connection failed' };
   if (error.message === 'Request body too large') return { status: 413, message: 'Request body too large' };
 
-  logger.error('Proof generation failed', error);
+  console.error('Proof generation failed', error);
   return { status: 500, message: 'Proof generation failed' };
 };
 
@@ -90,9 +88,9 @@ const handleProve = async (req: IncomingMessage): Promise<JsonResponse> => {
     return jsonResponse(400, { error: 'responseMatches must contain at least one entry' });
   }
 
-  logger.info(`Proving ${request.method} ${request.url}`);
+  console.info(`Proving ${request.method} ${request.url}`);
   const result = await prove(request);
-  logger.info('Proof generated successfully');
+  console.info('Proof generated successfully');
 
   return jsonResponse(200, result);
 };
@@ -131,7 +129,7 @@ const handleRequest = async (req: IncomingMessage, res: ServerResponse): Promise
 
 const createApp = (): Server => {
   const server = createServer((req, res) => {
-    void runWithContext({ requestId: randomUUID() }, () => handleRequest(req, res));
+    void handleRequest(req, res);
   });
   server.requestTimeout = 60_000; // eslint-disable-line functional/immutable-data
   server.headersTimeout = 10_000; // eslint-disable-line functional/immutable-data
@@ -146,8 +144,8 @@ const isDirectRun = process.argv[1] === fileURLToPath(import.meta.url);
 if (isDirectRun) {
   const app = createApp();
   app.listen(PORT, () => {
-    logger.info(`airnode-attestor listening on port ${String(PORT)}`);
-    logger.info(`attestor: ${ATTESTOR_URL}`);
+    console.info(`airnode-attestor listening on port ${String(PORT)}`);
+    console.info(`attestor: ${ATTESTOR_URL}`);
   });
 }
 
