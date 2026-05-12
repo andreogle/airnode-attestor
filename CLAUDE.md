@@ -11,7 +11,9 @@ Airnode config and the gateway handles everything.
 Node.js 22+ (not Bun). The Reclaim attestor-core SDK has native modules (`re2`, gnark FFI) that require Node.js.
 
 - `node --experimental-strip-types` for running TypeScript directly (no transpiler needed)
-- `npm install` for dependency management
+- `npm install` for dependency management — requires npm 11.10+ (the `.npmrc` `min-release-age=3` cooldown
+  refuses to install any package version published less than 3 days ago; older npm ignores it and warns). The
+  `node:22` Docker image and CI both run `npm install -g npm@11` before `npm ci`.
 - Use TypeScript with ESM (`"type": "module"` in package.json)
 
 ## Scripts

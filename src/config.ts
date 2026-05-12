@@ -53,13 +53,21 @@ const validatePort = (raw: string): number => {
   return port;
 };
 
+const validateTimeoutMs = (raw: string): number => {
+  const ms = Number(raw);
+  if (!Number.isInteger(ms) || ms < 1) {
+    throw new Error(`Invalid PROVE_TIMEOUT_MS: ${raw}. Must be a positive integer (milliseconds)`);
+  }
+  return ms;
+};
+
 // =============================================================================
 // Config
 // =============================================================================
 const PORT = validatePort(process.env['PORT'] ?? '5177');
 const ATTESTOR_URL = process.env['ATTESTOR_URL'] ?? 'ws://localhost:8001/ws';
 const ZK_ENGINE = validateZkEngine(process.env['ZK_ENGINE'] ?? 'gnark');
-const PROVE_TIMEOUT_MS = Number(process.env['PROVE_TIMEOUT_MS'] ?? '30000');
+const PROVE_TIMEOUT_MS = validateTimeoutMs(process.env['PROVE_TIMEOUT_MS'] ?? '30000');
 
 export { ATTESTOR_URL, PORT, PROVE_TIMEOUT_MS, VALID_METHODS, ZK_ENGINE, validateUrl };
 export type { ZkEngine };

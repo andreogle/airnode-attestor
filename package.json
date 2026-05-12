@@ -4,6 +4,10 @@
   "type": "module",
   "license": "AGPL-3.0-only",
   "private": true,
+  "engines": {
+    "node": ">=22",
+    "npm": ">=11.10.0"
+  },
   "scripts": {
     "dev": "node --experimental-strip-types --watch --import=./src/init-crypto.ts src/server.ts",
     "docker:up": "docker compose up --build",

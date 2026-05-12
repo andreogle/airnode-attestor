@@ -16,6 +16,8 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      # node 22 ships npm 10.x; need npm >= 11.10 for the min-release-age cooldown in .npmrc
+      - run: npm install -g npm@11
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
