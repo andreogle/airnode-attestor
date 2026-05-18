@@ -1,13 +1,8 @@
 // =============================================================================
 // HTTP primitives
 // =============================================================================
-interface JsonResponse {
-  readonly status: number;
-  readonly body: string;
-}
-
 interface SanitizedError {
-  readonly status: number;
+  readonly status: 500 | 504;
   readonly message: string;
 }
 
@@ -63,7 +58,6 @@ interface HealthResponse {
 export type {
   Claim,
   HealthResponse,
-  JsonResponse,
   ProveRequest,
   ProveResponse,
   ResponseMatch,
