@@ -2,7 +2,7 @@
   "name": "airnode-attestor",
   "version": "0.1.0",
   "type": "module",
-  "license": "AGPL-3.0-only",
+  "license": "AGPL-3.0-or-later",
   "private": true,
   "engines": {
     "node": ">=22",

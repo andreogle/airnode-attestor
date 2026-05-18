@@ -41,13 +41,38 @@ Airnode ──POST /prove──> airnode-attestor ──WebSocket──> Reclaim
 
 ## Quick start
 
+There are two ways to run the service. Docker is the simplest — both the gateway and the Reclaim attestor run in containers, and all native modules and ZK circuit files are handled inside the image. Running locally is for active development (hot reload via `npm run dev`).
+
+### With Docker
+
 ```bash
-npm run setup          # install deps, build native modules, download ZK circuits
 cp .env.example .env   # fill in PRIVATE_KEY
-npm run docker:up      # start attestor + gateway
+npm run docker:up      # build gateway + pull attestor, start both
 ```
 
 The gateway is available at `http://localhost:5177`.
+
+### Locally
+
+Install dependencies and download the ZK circuit files. `npm install` automatically builds the native `@reclaimprotocol/tls` module via its `prepare` script, but the circuit files must be downloaded explicitly:
+
+```bash
+npm install
+node node_modules/@reclaimprotocol/zk-symmetric-crypto/lib/scripts/download-files.js
+```
+
+`npm run dev` only starts the gateway — it still needs a Reclaim attestor to talk to. Start one with Docker in a separate terminal:
+
+```bash
+cp .env.example .env             # fill in PRIVATE_KEY (used by the attestor)
+docker compose up attestor       # attestor only, on ws://localhost:8001/ws
+```
+
+Then start the gateway with hot reload:
+
+```bash
+npm run dev
+```
 
 ## API
 
@@ -113,9 +138,10 @@ Returns service status and attestor URL.
 
 ## Development
 
+See [Locally](#locally) for first-time setup. Day-to-day commands:
+
 ```bash
-npm run setup        # install deps + build native modules + download ZK circuits
-npm run dev          # start with hot reload (requires a running attestor)
+npm run dev          # start gateway with hot reload (requires a running attestor)
 npm test             # run tests
 npm run typecheck    # type check without emitting
 npm run lint         # check formatting and linting
@@ -153,4 +179,4 @@ On-chain verification is available via [`@reclaimprotocol/reclaim-solidity-sdk`]
 
 ## License
 
-This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+This project is licensed under the [GNU Affero General Public License v3.0 or later](LICENSE).

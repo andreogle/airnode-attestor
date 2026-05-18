@@ -33,13 +33,14 @@ npm run docker:down  # docker compose down
 
 ## License
 
-**AGPL-3.0.** This is required because `@reclaimprotocol/attestor-core` is AGPL-3.0 licensed. The AGPL boundary is why
-this is a separate repo from Airnode (which is MIT). Airnode communicates with this service over HTTP — no code linkage.
+**AGPL-3.0-or-later.** This is required because `@reclaimprotocol/attestor-core` is AGPL-3.0 licensed. Airnode-v2 is
+also AGPL-3.0-or-later, so this lives in a separate repo for runtime reasons (Bun vs Node.js — attestor-core needs
+Node native modules) rather than licensing. Airnode communicates with this service over HTTP — no code linkage.
 
 ## Architecture
 
 ```
-Airnode (Bun, MIT)                    airnode-attestor (Node.js, AGPL)
+Airnode (Bun, AGPL)                   airnode-attestor (Node.js, AGPL)
   │                                     │
   │  POST /v1/prove                     │
   │  { url, method, headers, ... }      │
