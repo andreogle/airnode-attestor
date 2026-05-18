@@ -19,7 +19,7 @@ jobs:
       # node 22 ships npm 10.x; need npm >= 11.10 for the min-release-age cooldown in .npmrc.
       # corepack bypasses the bundled npm (which has a broken arborist install in node 22.22.2).
       - run: corepack enable
-      - run: corepack install --global npm@11
+      - run: corepack prepare npm@11 --activate
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
