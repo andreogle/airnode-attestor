@@ -25,7 +25,7 @@
     "@api3/promise-utils": "^0.4.0",
     "@hono/node-server": "^2.0.2",
     "@reclaimprotocol/attestor-core": "^5.0.1",
-    "hono": "^4.12.18",
+    "hono": "^4.12.23",
     "viem": "^2.47.6"
   },
   "devDependencies": {
