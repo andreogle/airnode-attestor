@@ -10,10 +10,13 @@ Airnode config and the gateway handles everything.
 
 Node.js 26+ (not Bun). The Reclaim attestor-core SDK has native modules (`re2`, gnark FFI) that require Node.js.
 
+- The Node.js version is pinned in `mise.toml` and managed with [mise](https://mise.jdx.dev) for local dev and CI
+  (`jdx/mise-action`). Docker pins its own `node:` base. Keep `mise.toml`, the Dockerfile base, and `engines.node`
+  in sync when bumping. The README documents the `mise` workflow.
 - `node --experimental-strip-types` for running TypeScript directly (no transpiler needed)
 - `npm install` for dependency management — requires npm 11.10+ (the `.npmrc` `min-release-age=3` cooldown
   refuses to install any package version published less than 3 days ago; older npm ignores it and warns). The
-  `node:26` Docker image and CI ship npm 11.16, which satisfies this.
+  `node:26` Docker image and the mise-pinned Node both ship npm 11.16, which satisfies this.
 - Use TypeScript with ESM (`"type": "module"` in package.json)
 
 ## Scripts

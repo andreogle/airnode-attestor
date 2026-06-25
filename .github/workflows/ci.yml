@@ -12,11 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 26
-          cache: npm
-      # node 26 ships npm 11.16, which satisfies the .npmrc min-release-age cooldown (needs npm >= 11.10).
+      - uses: jdx/mise-action@v2
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck

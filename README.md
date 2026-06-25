@@ -36,8 +36,20 @@ Airnode ──POST /prove──> airnode-attestor ──WebSocket──> Reclaim
 
 ## Prerequisites
 
-- Node.js 26+ and npm 11.10+ (npm 11.10 is required for the `.npmrc` `min-release-age` install cooldown)
 - Docker (for running the Reclaim attestor)
+- [mise](https://mise.jdx.dev) — manages the Node.js version pinned in [`mise.toml`](mise.toml). npm ships with
+  Node (the pinned version bundles npm 11.16, which satisfies the `.npmrc` `min-release-age` install cooldown).
+
+Install mise, then let it provision the toolchain:
+
+```bash
+curl https://mise.run | sh   # install mise (see mise.jdx.dev for other methods)
+mise trust                   # trust this repo's mise.toml (required once, and after it changes)
+mise install                 # install the Node.js version pinned in mise.toml
+```
+
+mise shims activate automatically in the project directory, so `node` and `npm` resolve to the pinned version.
+Docker builds don't need mise — the image pins its own Node base.
 
 ## Quick start
 
@@ -54,9 +66,10 @@ The gateway is available at `http://localhost:5177`.
 
 ### Locally
 
-Install dependencies and download the ZK circuit files. `npm install` automatically builds the native `@reclaimprotocol/tls` module via its `prepare` script, but the circuit files must be downloaded explicitly:
+Provision the toolchain (see [Prerequisites](#prerequisites)), install dependencies, and download the ZK circuit files. `npm install` automatically builds the native `@reclaimprotocol/tls` module via its `prepare` script, but the circuit files must be downloaded explicitly:
 
 ```bash
+mise install     # provision the pinned Node.js (run `mise trust` first on a fresh clone)
 npm install
 node node_modules/@reclaimprotocol/zk-symmetric-crypto/lib/scripts/download-files.js
 ```
@@ -147,6 +160,22 @@ npm run typecheck    # type check without emitting
 npm run lint         # check formatting and linting
 npm run fmt          # auto-fix formatting and linting
 ```
+
+### Managing Node with mise
+
+The Node.js version is pinned in [`mise.toml`](mise.toml) and managed with [mise](https://mise.jdx.dev).
+
+| Command                   | Description                                               |
+| ------------------------- | --------------------------------------------------------- |
+| `mise trust`              | Trust `mise.toml` (run once, and after it changes)        |
+| `mise install`            | Install the Node.js version pinned in `mise.toml`         |
+| `mise ls`                 | List installed tools and the active versions              |
+| `mise use node@latest`    | Upgrade Node to the latest release and update `mise.toml` |
+| `mise use node@26.3.1`    | Pin Node to a specific version in `mise.toml`             |
+| `mise exec -- node <cmd>` | Run a one-off command with the pinned toolchain           |
+
+To bump Node, run `mise use node@latest` (or pin an explicit version), then commit the updated `mise.toml`. Keep it in
+sync with the `node:` base in the [Dockerfile](Dockerfile) and the `engines.node` range in [package.json](package.json).
 
 Docker commands:
 
