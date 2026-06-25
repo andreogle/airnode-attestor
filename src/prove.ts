@@ -1,5 +1,5 @@
 import { go } from '@api3/promise-utils';
-import type { proto } from '@reclaimprotocol/attestor-core';
+import type { CreateClaimOnAttestorOpts, proto } from '@reclaimprotocol/attestor-core';
 import { createClaimOnAttestor } from '@reclaimprotocol/attestor-core';
 import { toHex } from 'viem';
 import { generatePrivateKey, privateKeyToAccount } from 'viem/accounts';
@@ -15,14 +15,17 @@ const generateOwnerKey = (): { readonly privateKey: `0x${string}`; readonly addr
   return { privateKey, address: account.address };
 };
 
-const buildClaimRequest = (request: ProveRequest, ownerPrivateKey: `0x${string}`): Record<string, unknown> => ({
+const buildClaimRequest = (
+  request: ProveRequest,
+  ownerPrivateKey: `0x${string}`
+): CreateClaimOnAttestorOpts<'http'> => ({
   name: 'http' as const,
   params: {
     url: request.url,
     method: request.method,
     body: request.body ?? '',
-    responseMatches: request.responseMatches ?? [],
-    responseRedactions: request.responseRedactions ?? [],
+    responseMatches: [...(request.responseMatches ?? [])],
+    responseRedactions: [...(request.responseRedactions ?? [])],
   },
   secretParams: { headers: request.headers ?? {} },
   ownerPrivateKey,
@@ -70,7 +73,7 @@ const prove = async (request: ProveRequest): Promise<ProveResponse> => {
     throw result.error;
   }
 
-  return extractResult(result.data as proto.ClaimTunnelResponse);
+  return extractResult(result.data);
 };
 
 export { prove };

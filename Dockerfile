@@ -1,11 +1,9 @@
-FROM node:22 AS base
+FROM node:26 AS base
 WORKDIR /app
 
-# node:22 ships npm 10.x; we need npm >= 11.10 for the min-release-age cooldown in .npmrc
-RUN npm install -g npm@11
-
 # Install dependencies — cannot use --ignore-scripts because
-# @reclaimprotocol/tls is a GitHub dep that needs its prepare script to build
+# @reclaimprotocol/tls is a GitHub dep that needs its prepare script to build.
+# node:26 ships npm 11.16, which satisfies the .npmrc min-release-age cooldown (needs npm >= 11.10).
 COPY package.json package-lock.json .npmrc ./
 RUN npm ci
 

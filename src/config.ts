@@ -47,7 +47,7 @@ const validateZkEngine = (raw: string): ZkEngine => {
 
 const validatePort = (raw: string): number => {
   const port = Number(raw);
-  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
+  if (!Number.isSafeInteger(port) || port < 1 || port > 65_535) {
     throw new Error(`Invalid PORT: ${raw}. Must be an integer between 1 and 65535`);
   }
   return port;
@@ -55,7 +55,7 @@ const validatePort = (raw: string): number => {
 
 const validateTimeoutMs = (raw: string): number => {
   const ms = Number(raw);
-  if (!Number.isInteger(ms) || ms < 1) {
+  if (!Number.isSafeInteger(ms) || ms < 1) {
     throw new Error(`Invalid PROVE_TIMEOUT_MS: ${raw}. Must be a positive integer (milliseconds)`);
   }
   return ms;

@@ -36,7 +36,7 @@ Airnode ──POST /prove──> airnode-attestor ──WebSocket──> Reclaim
 
 ## Prerequisites
 
-- Node.js 22+ and npm 11.10+ (npm 11.10 is required for the `.npmrc` `min-release-age` install cooldown)
+- Node.js 26+ and npm 11.10+ (npm 11.10 is required for the `.npmrc` `min-release-age` install cooldown)
 - Docker (for running the Reclaim attestor)
 
 ## Quick start

@@ -1,6 +1,6 @@
 import { defineConfig, globalIgnores } from 'eslint/config';
 import functionalPlugin from 'eslint-plugin-functional';
-import importPlugin from 'eslint-plugin-import';
+import importPlugin from 'eslint-plugin-import-x';
 import promisePlugin from 'eslint-plugin-promise';
 import unicornPlugin from 'eslint-plugin-unicorn';
 import globals from 'globals';
@@ -21,17 +21,18 @@ export default defineConfig([
         projectService: {
           allowDefaultProject: ['eslint.config.mjs'],
         },
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment -- import.meta.dirname is error-typed in the default project
         tsconfigRootDir: import.meta.dirname,
       },
     },
 
     plugins: {
       functional: functionalPlugin,
-      import: importPlugin,
+      'import-x': importPlugin,
     },
 
     settings: {
-      'import/resolver': {
+      'import-x/resolver': {
         typescript: true,
         node: true,
       },
@@ -68,9 +69,17 @@ export default defineConfig([
       // --- Unicorn overrides ---
       'unicorn/number-literal-case': 'off', // Conflicts with Prettier (Prettier uppercases hex)
       'unicorn/prevent-abbreviations': 'off',
+      'unicorn/name-replacements': 'off',
+      // Conflicts with functional/no-loop-statements (recursion replaces loops).
+      'unicorn/no-useless-recursion': 'off',
+      // Conflicts with the no-else / early-return style (wants `else if`).
+      'unicorn/prefer-else-if': 'off',
+      // Conflicts with the no-try/catch convention and deliberate promise
+      // combinators used to cache and race promises.
+      'unicorn/prefer-await': 'off',
 
       // --- Import ordering (alphabetical) ---
-      'import/order': [
+      'import-x/order': [
         'error',
         {
           groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
@@ -78,15 +87,22 @@ export default defineConfig([
           'newlines-between': 'never',
         },
       ],
-      'import/no-duplicates': 'error',
-      'import/no-mutable-exports': 'error',
-      'import/no-self-import': 'error',
-      'import/no-cycle': ['error', { maxDepth: 4 }],
+      'import-x/no-duplicates': 'error',
+      'import-x/no-mutable-exports': 'error',
+      'import-x/no-self-import': 'error',
+      'import-x/no-cycle': ['error', { maxDepth: 4 }],
     },
   },
 
   {
     files: ['**/*.test.ts', '**/*.test.tsx'],
-    rules: Object.fromEntries(Object.keys(functionalPlugin.rules).map((rule) => [`functional/${rule}`, 'off'])),
+    rules: {
+      ...Object.fromEntries(Object.keys(functionalPlugin.rules).map((rule) => [`functional/${rule}`, 'off'])),
+      // Standard async fixture pattern: `let ctx; beforeAll(() => { ctx = ... })`.
+      'unicorn/no-top-level-assignment-in-function': 'off',
+      // Tests mock process globals (e.g. fetch) and nest calls in assertions.
+      'unicorn/no-global-object-property-assignment': 'off',
+      'unicorn/max-nested-calls': 'off',
+    },
   },
 ]);

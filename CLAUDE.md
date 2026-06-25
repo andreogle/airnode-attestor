@@ -8,12 +8,12 @@ Airnode config and the gateway handles everything.
 
 ## Runtime
 
-Node.js 22+ (not Bun). The Reclaim attestor-core SDK has native modules (`re2`, gnark FFI) that require Node.js.
+Node.js 26+ (not Bun). The Reclaim attestor-core SDK has native modules (`re2`, gnark FFI) that require Node.js.
 
 - `node --experimental-strip-types` for running TypeScript directly (no transpiler needed)
 - `npm install` for dependency management — requires npm 11.10+ (the `.npmrc` `min-release-age=3` cooldown
   refuses to install any package version published less than 3 days ago; older npm ignores it and warns). The
-  `node:22` Docker image and CI both run `npm install -g npm@11` before `npm ci`.
+  `node:26` Docker image and CI ship npm 11.16, which satisfies this.
 - Use TypeScript with ESM (`"type": "module"` in package.json)
 
 ## Scripts
@@ -102,7 +102,7 @@ src/
   types.ts              Request/response types
 .github/workflows/ci.yml  CI: lint, typecheck, test
 docker-compose.yml        Reclaim attestor container + this service
-Dockerfile                Multi-stage Node 22 image
+Dockerfile                Multi-stage Node 26 image
 .env.example              Attestor private key, port config
 ```
 
@@ -311,7 +311,7 @@ GitHub Actions runs on push/PR to `main` (`.github/workflows/ci.yml`):
 2. `npm run typecheck` — `tsc --noEmit`
 3. `npm test` — vitest
 
-All three run in a single job on Node 22.
+All three run in a single job on Node 26.
 
 ## Git
 

@@ -14,12 +14,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 26
           cache: npm
-      # node 22 ships npm 10.x; need npm >= 11.10 for the min-release-age cooldown in .npmrc.
-      # corepack bypasses the bundled npm (which has a broken arborist install in node 22.22.2).
-      - run: corepack enable
-      - run: corepack prepare npm@11 --activate
+      # node 26 ships npm 11.16, which satisfies the .npmrc min-release-age cooldown (needs npm >= 11.10).
       - run: npm ci
       - run: npm run lint
       - run: npm run typecheck
