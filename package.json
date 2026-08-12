@@ -26,7 +26,7 @@
     "@hono/node-server": "^2.0.10",
     "@reclaimprotocol/attestor-core": "^5.0.1",
     "hono": "^4.13.1",
-    "viem": "^2.53.1"
+    "viem": "^2.55.13"
   },
   "devDependencies": {
     "@types/node": "^26.0.1",
