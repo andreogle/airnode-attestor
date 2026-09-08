@@ -1,18 +1,29 @@
+> ## ⚠️ Archived research project
+>
+> **This repository was a research project only and is no longer maintained. It has been superseded by API3's
+> AirnodeHub. Do not use this code. It was never audited and is not suitable for any production or mainnet deployment.**
+
 # airnode-attestor
 
 HTTP service that generates TLS proofs for API responses using [Reclaim Protocol](https://reclaimprotocol.org/). It sits between [Airnode](https://github.com/api3dao/airnode) and a Reclaim attestor, providing cryptographic proof that API data is authentic.
 
 ## Table of contents
 
-- [Why](#why)
-- [How it works](#how-it-works)
-- [Prerequisites](#prerequisites)
-- [Quick start](#quick-start)
-- [API](#api)
-- [Configuration](#configuration)
-- [Development](#development)
-- [Proof verification](#proof-verification)
-- [License](#license)
+- [airnode-attestor](#airnode-attestor)
+  - [Table of contents](#table-of-contents)
+  - [Why](#why)
+  - [How it works](#how-it-works)
+  - [Prerequisites](#prerequisites)
+  - [Quick start](#quick-start)
+    - [With Docker](#with-docker)
+    - [Locally](#locally)
+  - [API](#api)
+    - [`POST /v1/prove`](#post-v1prove)
+    - [`GET /v1/health`](#get-v1health)
+  - [Configuration](#configuration)
+  - [Development](#development)
+  - [Proof verification](#proof-verification)
+  - [License](#license)
 
 ## Why
 
